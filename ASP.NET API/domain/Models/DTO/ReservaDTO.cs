@@ -31,4 +31,10 @@ public class ReservaDTO
     public StatusPrecificacao Status { get; set; }
     public OpcoesServico TipoServico { get; set; }
     public bool EmitirNF { get; set; } = false;
+
+    // Pagamento Asaas
+    public string? AsaasCustomerId { get; set; }
+    public string? AsaasPaymentId { get; set; }
+    public string? InvoiceUrl { get; set; }
+    public DateTime? DataVencimento { get; set; }
 }
