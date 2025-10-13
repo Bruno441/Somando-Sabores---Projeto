@@ -3,6 +3,7 @@ using domain.IServices;
 using domain.Models;
 using domain.Models.DTO;
 using domain.Enums;
+using domain.Models.Asaas;
 using infra.DbContext;
 
 namespace somandosabores.api.Services;
@@ -10,7 +11,8 @@ namespace somandosabores.api.Services;
 public class ReservaService(ApplicationDbContext context,
                             IClienteService clienteService,
                             IPrecificacaoService precificacaoService,
-                            IConvidadoService convidadoService) : IReservaService
+                            IConvidadoService convidadoService,
+                            IAsaasService asaasService) : IReservaService
 {
     public async Task<ServiceResponse<Reserva>> CreateReserva(Reserva reserva)
     {
@@ -156,6 +158,75 @@ public class ReservaService(ApplicationDbContext context,
                 reservaDTO.IdsConvidados = convidadosResponse.Data.Select(c => c.Id).ToList();
             }
 
+            // Integração com Asaas para pagamento
+            string? asaasCustomerId = null;
+            string? asaasPaymentId = null;
+            string? invoiceUrl = null;
+
+            try
+            {
+                // 1. Verificar se cliente já existe no Asaas ou criar novo
+                var asaasCustomerExistente = await asaasService.GetCustomerByEmailAsync(emailCliente);
+                
+                if (asaasCustomerExistente.Data != null)
+                {
+                    asaasCustomerId = asaasCustomerExistente.Data.Id;
+                }
+                else
+                {
+                    // Criar cliente no Asaas
+                    var novoCustomerAsaas = new AsaasCustomer
+                    {
+                        Name = nomeCliente,
+                        Email = emailCliente,
+                        CpfCnpj = reservaDTO.CpfOuCnpj,
+                        NotificationDisabled = true,
+                        ExternalReference = idDoCliente.ToString()
+                    };
+
+                    var customerResponse = await asaasService.CreateCustomerAsync(novoCustomerAsaas);
+                    
+                    if (customerResponse.Data != null)
+                    {
+                        asaasCustomerId = customerResponse.Data.Id;
+                    }
+                }
+
+                // 2. Criar cobrança no Asaas se cliente foi criado/encontrado
+                if (!string.IsNullOrEmpty(asaasCustomerId))
+                {
+                    var tipoPagamento = "UNDEFINED"; // Default value
+                    var dataVencimento = reservaDTO.DataVencimento ?? DateTime.Now; // 7 dias para pagamento
+                    Console.WriteLine("Criando pagamento Asaas...");
+
+                    var pagamentoAsaas = new AsaasPayment
+                    {
+                        Customer = asaasCustomerId,
+                        BillingType = tipoPagamento,
+                        Callback = new AsaasCallback { SuccessUrl = "https://somando-sabores-projeto.vercel.app/confirmacao" },
+                        Value = precificacaoResponse.Data.Total,
+                        DueDate = dataVencimento,
+                        Description = $"Reserva - {nomeCliente} - {reservaResponse.Data.DataReserva:dd/MM/yyyy}",
+                        ExternalReference = reservaResponse.Data.Id.ToString()
+                    };
+
+                    Console.WriteLine(pagamentoAsaas);
+
+                    var paymentResponse = await asaasService.CreatePaymentAsync(pagamentoAsaas);
+                    
+                    if (paymentResponse.Data != null)
+                    {
+                        asaasPaymentId = paymentResponse.Data.Id;
+                        invoiceUrl = paymentResponse.Data.InvoiceUrl;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log do erro mas não interrompe o fluxo principal da reserva
+                Console.WriteLine($"Erro ao integrar com Asaas: {ex.Message}");
+            }
+
             serviceResponse.Data = new ReservaDTO
             {
                 Id = reservaResponse.Data.Id,
@@ -173,10 +244,22 @@ public class ReservaService(ApplicationDbContext context,
                 Total = precificacaoResponse.Data.Total,
                 Status = precificacaoResponse.Data.Status,
                 TipoServico = precificacaoResponse.Data.TipoServico,
-                EmitirNF = precificacaoResponse.Data.EmitirNF
+                EmitirNF = precificacaoResponse.Data.EmitirNF,
+
+                // Dados do Asaas
+                AsaasCustomerId = asaasCustomerId,
+                AsaasPaymentId = asaasPaymentId,
+                InvoiceUrl = invoiceUrl,
+                DataVencimento = reservaDTO.DataVencimento
             };
 
-            serviceResponse.Message = "Reserva cadastrada com sucesso";
+            var mensagemSucesso = "Reserva cadastrada com sucesso";
+            if (!string.IsNullOrEmpty(asaasPaymentId))
+            {
+                mensagemSucesso += " e cobrança criada no sistema de pagamento";
+            }
+
+            serviceResponse.Message = mensagemSucesso;
             serviceResponse.Success = true;
             return serviceResponse;
 

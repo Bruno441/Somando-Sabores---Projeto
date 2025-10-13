@@ -44,6 +44,10 @@ builder.Services.AddScoped<IPacoteService, PacoteService>();
 builder.Services.AddScoped<IPagamentoService, PagamentoService>();
 builder.Services.AddScoped<IPrecificacaoService, PrecificacaoService>();
 
+// Configurar HttpClient para Asaas
+builder.Services.AddHttpClient<IAsaasService, AsaasService>();
+builder.Services.AddScoped<IAsaasService, AsaasService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
