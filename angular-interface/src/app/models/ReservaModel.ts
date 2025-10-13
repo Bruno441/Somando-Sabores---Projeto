@@ -8,4 +8,5 @@ export interface Reserva {
     quantidade: number;
     nomesConvidados: string[];
     total: number;
+    invoiceUrl: string;
 }

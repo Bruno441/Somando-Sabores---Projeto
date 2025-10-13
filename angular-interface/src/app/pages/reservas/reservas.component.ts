@@ -127,12 +127,21 @@ export class ReservasComponent implements OnInit {
       
       // console.log("Dados da reserva: ", dadosReserva);
       this.reservaService.create(dadosReserva).subscribe({
-        next: (response) => {
+        next: (response: any) => {
+          console.log('Resposta completa do backend:', response);
           alert(` Reserva cadastrada com sucesso! `);
-          //this.router.navigate(['/pagamentos']);
-          //this.iniciarProcessoDePagamento(); 
+          
+          // Verificar se a invoiceUrl existe na resposta
+          if (response && response.data.invoiceUrl) {
+            console.log('URL da fatura encontrada:', response.invoiceUrl);
+            window.location.href = response.data.invoiceUrl;
+          } else {
+            console.log('invoiceUrl não encontrada na resposta');
+            // this.router.navigate(['/confirmacao']);
+          }
         },
         error: (msgErro) => {
+          console.error('Erro completo:', msgErro);
           alert(msgErro.error.message);
         }
       });
