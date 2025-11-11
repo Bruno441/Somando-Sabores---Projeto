@@ -3,6 +3,7 @@ using domain.IServices;
 using domain.Models;
 using domain.Models.DTO;
 using domain.Enums;
+using domain.Models.Asaas;
 using infra.DbContext;
 
 namespace somandosabores.api.Services;
@@ -10,7 +11,8 @@ namespace somandosabores.api.Services;
 public class ReservaService(ApplicationDbContext context,
                             IClienteService clienteService,
                             IPrecificacaoService precificacaoService,
-                            IConvidadoService convidadoService) : IReservaService
+                            IConvidadoService convidadoService,
+                            IAsaasService asaasService) : IReservaService
 {
     public async Task<ServiceResponse<Reserva>> CreateReserva(Reserva reserva)
     {
@@ -45,9 +47,13 @@ public class ReservaService(ApplicationDbContext context,
     public async Task<ServiceResponse<ReservaDTO>> CreateReservaDTO(ReservaDTO reservaDTO)
     {
         var serviceResponse = new ServiceResponse<ReservaDTO>();
+        
         try
         {
-            if (reservaDTO == null)
+            if (reservaDTO == null ||
+                string.IsNullOrWhiteSpace(reservaDTO.Nome) ||
+                string.IsNullOrWhiteSpace(reservaDTO.Email)
+                )
             {
                 serviceResponse.Data = null;
                 serviceResponse.Message = "Informar Dados da reserva";
@@ -87,14 +93,14 @@ public class ReservaService(ApplicationDbContext context,
                 else
                 {
                     serviceResponse.Data = null;
-                    serviceResponse.Message = $"Erro no cadastro do cliente: {clienteResponse.Message}`";
+                    serviceResponse.Message = $"Erro no cadastro do cliente: {clienteResponse.Message}";
                     serviceResponse.Success = false;
                     return serviceResponse;
                 }
             }
 
             // Envio de dados da Precificacao
-                var precificacao = new Precificacao
+            var precificacao = new Precificacao
             {
                 TipoServico = OpcoesServico.Reserva,
                 Quantidade = reservaDTO.Quantidade,
@@ -113,7 +119,6 @@ public class ReservaService(ApplicationDbContext context,
                 return serviceResponse;
             }
 
-
             // Envia Dados de Reserva
             var reserva = new Reserva
             {
@@ -125,20 +130,101 @@ public class ReservaService(ApplicationDbContext context,
 
             var reservaResponse = await CreateReserva(reserva);
 
+            var convidadosParaInserir = new List<Convidado>();
+
             if (reservaDTO.QtdConvidados > 0)
             {
-                int convidados = 0;
-                while (convidados < reservaDTO.QtdConvidados)
+                for (int i = 0; i < reservaDTO.QtdConvidados; i++)
                 {
                     var convidado = new Convidado
                     {
-                        Nome = reservaDTO.NomesConvidados[convidados],
+                        Nome = reservaDTO.NomesConvidados[i],
                         ReservaId = reservaResponse.Data.Id
                     };
-
-                    await convidadoService.CreateConvidado(convidado);
-                    convidados++;
+                    convidadosParaInserir.Add(convidado);
                 }
+
+                // Inserção em Lote
+                var convidadosResponse = await convidadoService.CreateConvidados(convidadosParaInserir);
+
+                if (!convidadosResponse.Success)
+                {
+                    serviceResponse.Data = null;
+                    serviceResponse.Message = $"Erro no cadastro dos convidados: {convidadosResponse.Message}";
+                    serviceResponse.Success = false;
+                    return serviceResponse;
+                }
+
+                reservaDTO.IdsConvidados = convidadosResponse.Data.Select(c => c.Id).ToList();
+            }
+
+            // Integração com Asaas para pagamento
+            string? asaasCustomerId = null;
+            string? asaasPaymentId = null;
+            string? invoiceUrl = null;
+
+            try
+            {
+                // 1. Verificar se cliente já existe no Asaas ou criar novo
+                var asaasCustomerExistente = await asaasService.GetCustomerByEmailAsync(emailCliente);
+                
+                if (asaasCustomerExistente.Data != null)
+                {
+                    asaasCustomerId = asaasCustomerExistente.Data.Id;
+                }
+                else
+                {
+                    // Criar cliente no Asaas
+                    var novoCustomerAsaas = new AsaasCustomer
+                    {
+                        Name = nomeCliente,
+                        Email = emailCliente,
+                        CpfCnpj = reservaDTO.CpfOuCnpj,
+                        NotificationDisabled = true,
+                        ExternalReference = idDoCliente.ToString()
+                    };
+
+                    var customerResponse = await asaasService.CreateCustomerAsync(novoCustomerAsaas);
+                    
+                    if (customerResponse.Data != null)
+                    {
+                        asaasCustomerId = customerResponse.Data.Id;
+                    }
+                }
+
+                // 2. Criar cobrança no Asaas se cliente foi criado/encontrado
+                if (!string.IsNullOrEmpty(asaasCustomerId))
+                {
+                    var tipoPagamento = "UNDEFINED"; // Default value
+                    var dataVencimento = reservaDTO.DataVencimento ?? DateTime.Now; // 7 dias para pagamento
+                    Console.WriteLine("Criando pagamento Asaas...");
+
+                    var pagamentoAsaas = new AsaasPayment
+                    {
+                        Customer = asaasCustomerId,
+                        BillingType = tipoPagamento,
+                        Callback = new AsaasCallback { SuccessUrl = "https://somando-sabores-projeto.vercel.app/confirmacao" },
+                        Value = precificacaoResponse.Data.Total,
+                        DueDate = dataVencimento,
+                        Description = $"Reserva - {nomeCliente} - {reservaResponse.Data.DataReserva:dd/MM/yyyy}",
+                        ExternalReference = reservaResponse.Data.Id.ToString()
+                    };
+
+                    Console.WriteLine(pagamentoAsaas);
+
+                    var paymentResponse = await asaasService.CreatePaymentAsync(pagamentoAsaas);
+                    
+                    if (paymentResponse.Data != null)
+                    {
+                        asaasPaymentId = paymentResponse.Data.Id;
+                        invoiceUrl = paymentResponse.Data.InvoiceUrl;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log do erro mas não interrompe o fluxo principal da reserva
+                Console.WriteLine($"Erro ao integrar com Asaas: {ex.Message}");
             }
 
             serviceResponse.Data = new ReservaDTO
@@ -151,16 +237,29 @@ public class ReservaService(ApplicationDbContext context,
                 Nome = nomeCliente,
                 Email = emailCliente,
 
+                IdsConvidados = reservaDTO.IdsConvidados,
                 NomesConvidados = reservaDTO.NomesConvidados,
 
                 Quantidade = precificacaoResponse.Data.Quantidade,
                 Total = precificacaoResponse.Data.Total,
                 Status = precificacaoResponse.Data.Status,
                 TipoServico = precificacaoResponse.Data.TipoServico,
-                EmitirNF = precificacaoResponse.Data.EmitirNF
+                EmitirNF = precificacaoResponse.Data.EmitirNF,
+
+                // Dados do Asaas
+                AsaasCustomerId = asaasCustomerId,
+                AsaasPaymentId = asaasPaymentId,
+                InvoiceUrl = invoiceUrl,
+                DataVencimento = reservaDTO.DataVencimento
             };
 
-            serviceResponse.Message = "Reserva cadastrada com sucesso";
+            var mensagemSucesso = "Reserva cadastrada com sucesso";
+            if (!string.IsNullOrEmpty(asaasPaymentId))
+            {
+                mensagemSucesso += " e cobrança criada no sistema de pagamento";
+            }
+
+            serviceResponse.Message = mensagemSucesso;
             serviceResponse.Success = true;
             return serviceResponse;
 
@@ -168,19 +267,19 @@ public class ReservaService(ApplicationDbContext context,
         catch (Exception e)
         {
             serviceResponse.Data = null;
-            serviceResponse.Message = "Erro ao cadastrar reserva: " + e.Message;
+            serviceResponse.Message = $"Erro ao cadastrar reserva: {e.Message}";
             serviceResponse.Success = false;
 
             return serviceResponse;
         }
     }
 
-    public async Task<ServiceResponse<ReservaDTO>> GetReservaDTO(Guid id)
+    public async Task<ServiceResponse<ReservaDTO>> GetReservaDTO(Guid? id)
     {
         var serviceResponse = new ServiceResponse<ReservaDTO>();
         try
         {
-            if (id == Guid.Empty)
+            if (id == Guid.Empty || id == null)
             {
                 serviceResponse.Data = null;
                 serviceResponse.Message = "Id invalido";
@@ -204,6 +303,7 @@ public class ReservaService(ApplicationDbContext context,
                 Nome = reserva.Cliente.Nome,
                 Email = reserva.Cliente.Email,
 
+                IdsConvidados = reserva.Convidados?.Select(c => c.Id).ToList(),
                 NomesConvidados = reserva.Convidados?.Select(c => c.Nome).ToList(),
 
                 Quantidade = reserva.Precificacao.Quantidade,
@@ -231,7 +331,10 @@ public class ReservaService(ApplicationDbContext context,
         var serviceResponse = new ServiceResponse<ReservaDTO>();
         try
         {
-            if (reservaDTO == null || reservaDTO.Id == Guid.Empty)
+            if (reservaDTO == null ||
+                reservaDTO.Id == Guid.Empty ||
+                string.IsNullOrWhiteSpace(reservaDTO.Nome) ||
+                string.IsNullOrWhiteSpace(reservaDTO.Email))
             {
                 serviceResponse.Data = null;
                 serviceResponse.Message = "Informar Dados da reserva";
@@ -268,61 +371,56 @@ public class ReservaService(ApplicationDbContext context,
 
             var precificacaoUpdate = await precificacaoService.UpdatePrecificacao(reservaExistente.Precificacao);
 
+            if (!clienteUpdate.Success || !precificacaoUpdate.Success)
+            {
+                serviceResponse.Data = null;
+                serviceResponse.Message = "Erro na atualização dos dados. Verifique as informações novamente.";
+                serviceResponse.Success = false;
+                return serviceResponse;
+            }
+
             // Reserva
             reservaExistente.DataReserva = reservaDTO.DataReserva;
             reservaExistente.QtdConvidados = reservaDTO.QtdConvidados;
 
-            if (reservaDTO.QtdConvidados > 0)
+            if (reservaDTO.QtdConvidados > 0 && reservaDTO.NomesConvidados?.Any() == true)
             {
-                var nomesNoDto = reservaDTO.NomesConvidados ?? new List<string>();
-                var convidadosParaRemover = reservaExistente.Convidados
-                                                        .Where(c => !nomesNoDto.Contains(c.Nome))
-                                                        .ToList();
-
-                foreach (var convidado in convidadosParaRemover)
+                var convidadosAtualizados = reservaDTO.NomesConvidados.Select(nome => new Convidado
                 {
-                    await convidadoService.DeleteConvidado(convidado.Id);
-                }
+                    Nome = nome,
+                    ReservaId = reservaExistente.Id
+                }).ToList();
 
-                var nomesAtualmenteNoBanco = reservaExistente.Convidados.Select(c => c.Nome).ToList();
-                var nomesParaAdicionar = nomesNoDto.Where(nome => !nomesAtualmenteNoBanco.Contains(nome)).ToList();
+                var updateResult = await convidadoService.UpdateConvidados(convidadosAtualizados);
 
-                foreach (var nomeNovo in nomesParaAdicionar)
+                if (!updateResult.Success)
                 {
-                    var novoConvidado = new Convidado
-                    {
-                        Nome = nomeNovo,
-                        ReservaId = reservaExistente.Id
-                    };
-                    await convidadoService.CreateConvidado(novoConvidado);
+                    serviceResponse.Data = null;
+                    serviceResponse.Message = "Erro ao atualizar convidados: " + updateResult.Message;
+                    serviceResponse.Success = false;
+                    return serviceResponse;
                 }
             }
 
             context.Update(reservaExistente);
-            await context.SaveChangesAsync();
-
-            var reservaAtualizada = await context.Reservas
-                                                .Include(r => r.Cliente)
-                                                .Include(r => r.Precificacao)
-                                                .Include(r => r.Convidados)
-                                                .FirstOrDefaultAsync(r => r.Id == reservaDTO.Id);
+            // await context.SaveChangesAsync();
 
             serviceResponse.Data = new ReservaDTO
             {
-                Id = reservaAtualizada.Id,
-                DataReserva = reservaAtualizada.DataReserva,
-                QtdConvidados = reservaAtualizada.QtdConvidados,
+                Id = reservaExistente.Id,
+                DataReserva = reservaExistente.DataReserva,
+                QtdConvidados = reservaExistente.QtdConvidados,
 
-                Nome = reservaAtualizada.Cliente?.Nome,
-                Email = reservaAtualizada.Cliente?.Email,
+                Nome = reservaExistente.Cliente?.Nome,
+                Email = reservaExistente.Cliente?.Email,
 
-                NomesConvidados = reservaAtualizada.Convidados?.Select(c => c.Nome).ToList(),
+                NomesConvidados = reservaExistente.Convidados?.Select(c => c.Nome).ToList(),
 
-                Quantidade = reservaAtualizada.Precificacao.Quantidade,
-                Total = reservaAtualizada.Precificacao.Total,
-                Status = reservaAtualizada.Precificacao.Status,
-                TipoServico = reservaAtualizada.Precificacao.TipoServico,
-                EmitirNF = reservaAtualizada.Precificacao.EmitirNF
+                Quantidade = reservaExistente.Precificacao.Quantidade,
+                Total = reservaExistente.Precificacao.Total,
+                Status = reservaExistente.Precificacao.Status,
+                TipoServico = reservaExistente.Precificacao.TipoServico,
+                EmitirNF = reservaExistente.Precificacao.EmitirNF
             };
 
             serviceResponse.Message = "Reserva atualizada com sucesso";
@@ -339,17 +437,30 @@ public class ReservaService(ApplicationDbContext context,
         }
     }
 
-    public async Task<ServiceResponse<string>> DeleteReserva(Guid id)
+    public async Task<ServiceResponse<string>> DeleteReserva(Guid? id)
     {
         var serviceRespose = new ServiceResponse<string>();
         try
         {
             var reserva = await context.Reservas.FindAsync(id);
-            if (id == Guid.Empty|| reserva == null)
+            var reservaDTO = await GetReservaDTO(id);
+
+            if (id == Guid.Empty || id == null || reservaDTO != null)
             {
                 serviceRespose.Data = null;
                 serviceRespose.Message = "Id invalido";
                 serviceRespose.Success = false;
+            }
+
+            var idsDosConvidados = reservaDTO.Data.IdsConvidados;
+            var convidadosResponse = await convidadoService.DeleteConvidados(idsDosConvidados);
+
+            if (!convidadosResponse.Success)
+            {
+                serviceRespose.Data = null;
+                serviceRespose.Message = $"Erro ao excluir convidados: {convidadosResponse.Message}";
+                serviceRespose.Success = false;
+                return serviceRespose;
             }
 
             context.Reservas.Remove(reserva);
@@ -363,7 +474,7 @@ public class ReservaService(ApplicationDbContext context,
         catch (Exception e)
         {
             serviceRespose.Data = null;
-            serviceRespose.Message = "Erro durante deleção: " + e.Message;
+            serviceRespose.Message = "Erro durante deleção: " + e.InnerException;
             serviceRespose.Success = false;
             return serviceRespose;
         }

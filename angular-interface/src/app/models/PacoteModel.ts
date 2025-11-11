@@ -1,7 +1,11 @@
 export interface Pacote {
+    idAluno: string,
+    idPacote: string | undefined;
+    nome: string | undefined;
+    email: string | undefined;
+    ra: string | undefined;
     dataInicio: string;
     dataFim: string;
-    idAluno: string | undefined;
     quantidade: number;
     total: number;
 }

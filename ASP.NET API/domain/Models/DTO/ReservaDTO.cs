@@ -12,7 +12,7 @@ namespace domain.Models.DTO;
 public class ReservaDTO
 {
     // Reserva
-    public Guid Id { get; set; }
+    public Guid? Id { get; set; }
     public string? CpfOuCnpj { get; set; }
     public DateTime DataReserva { get; set; }
     public int QtdConvidados { get; set; }
@@ -22,6 +22,7 @@ public class ReservaDTO
     public string? Email { get; set; }
 
     // Convidado
+    public List<Guid>? IdsConvidados { get; set; }
     public List<string>? NomesConvidados { get; set; }
 
     // Precificação
@@ -30,4 +31,10 @@ public class ReservaDTO
     public StatusPrecificacao Status { get; set; }
     public OpcoesServico TipoServico { get; set; }
     public bool EmitirNF { get; set; } = false;
+
+    // Pagamento Asaas
+    public string? AsaasCustomerId { get; set; }
+    public string? AsaasPaymentId { get; set; }
+    public string? InvoiceUrl { get; set; }
+    public DateTime? DataVencimento { get; set; }
 }

@@ -1,4 +1,5 @@
 export interface Reserva {
+    id: string;
     cpfOuCnpj: string;
     dataReserva: string;
     qtdConvidados: number;
@@ -7,4 +8,5 @@ export interface Reserva {
     quantidade: number;
     nomesConvidados: string[];
     total: number;
+    invoiceUrl: string;
 }

@@ -16,7 +16,8 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"),
+    options.UseNpgsql(Environment.GetEnvironmentVariable("CONNECTION_STRING") ??
+                      builder.Configuration.GetConnectionString("DefaultConnection"),
         npgsqlOptions =>
         {
             npgsqlOptions.MapEnum<StatusPrecificacao>("status_pagamento");
@@ -28,9 +29,10 @@ builder.Services.AddCors(options => {
     options.AddPolicy("AllowSpecificOrigin", 
     builder => {
         builder.WithOrigins("http://localhost:4200")
+        // builder.WithOrigins("https://somando-sabores-projeto.vercel.app")
         .WithHeaders("Content-Type", "Authorization")
         // CORS header ‘Access-Control-Allow-Origin’
-        .WithMethods("GET", "POST");});
+        .WithMethods("GET", "POST", "PUT", "DELETE");});
 });
 
 //builder.Services.AddScoped<IEventoService, EventoService>();
@@ -39,8 +41,12 @@ builder.Services.AddScoped<IAlunoService, AlunoService>();
 builder.Services.AddScoped<IClienteService, ClienteService>();
 builder.Services.AddScoped<IConvidadoService, ConvidadoService>();
 builder.Services.AddScoped<IPacoteService, PacoteService>();
-// builder.Services.AddScoped<IPagamentoService, PagamentoService>();
+builder.Services.AddScoped<IPagamentoService, PagamentoService>();
 builder.Services.AddScoped<IPrecificacaoService, PrecificacaoService>();
+
+// Configurar HttpClient para Asaas
+builder.Services.AddHttpClient<IAsaasService, AsaasService>();
+builder.Services.AddScoped<IAsaasService, AsaasService>();
 
 var app = builder.Build();
 
