@@ -8,8 +8,8 @@ import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, FormsModule, NgForm } from '@angular/forms';
 import { ReservaService } from '../../services/reservas/reserva.service';
 import { RouterModule, Router} from '@angular/router';
-// import { environment } from '../../../environments/environment'; 
-// import { NgxMaskDirective } from 'ngx-mask';
+import { environment } from '../../../environments/environment'; 
+import { NgxMaskDirective } from 'ngx-mask';
 interface CustomerResponse {
   data: { id: string }[];
 }
@@ -17,7 +17,7 @@ interface CustomerResponse {
 @Component({
   standalone: true,
   selector: 'app-reservas',
-  imports: [HeaderBarComponent, CommonModule, FormsModule, MatIcon],//, NgxMaskDirective],
+  imports: [HeaderBarComponent, CommonModule, FormsModule, MatIcon, NgxMaskDirective],
   templateUrl: './reservas.component.html',
   styleUrls: ['./reservas.component.scss']
 })
