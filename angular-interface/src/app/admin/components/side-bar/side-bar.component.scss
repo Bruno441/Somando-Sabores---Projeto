@@ -59,3 +59,42 @@ header {
     font-size: 1.5em;
     text-wrap: wrap;
 }
+
+/* Estilização do footer e botão de logout */
+.sidebar-footer {
+    margin-top: auto;
+    padding: 20px 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.logout-btn {
+    width: 90%;
+    height: 50px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-family: "IM Fell English", serif;
+    font-size: 1.2em;
+    transition: all 0.3s ease;
+
+    &:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+        border-color: #F3EAAF;
+        color: #F3EAAF;
+        cursor: pointer;
+    }
+
+    mat-icon {
+        font-size: 22px;
+        width: 22px;
+        height: 22px;
+    }
+}

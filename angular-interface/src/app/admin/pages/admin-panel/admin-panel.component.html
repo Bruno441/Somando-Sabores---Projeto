@@ -4,20 +4,50 @@
         <div class="img-bg">
             <img src="admin-container2.png" id="bg-container"/>
         </div>
-        <form class="form">
+        <form class="form" (ngSubmit)="onSubmit()">
             <h1>Login</h1>
+            
+            <!-- Mensagem de erro -->
+            <div *ngIf="errorMessage" class="error-alert">
+                <mat-icon>error</mat-icon>
+                <span>{{ errorMessage }}</span>
+            </div>
+
             <p class="texto">Usuário</p>
             <mat-form-field appearance="fill" id="usuario" class="input-box">
-                <input matInput>
+                <input 
+                    matInput 
+                    [(ngModel)]="username" 
+                    name="username" 
+                    required
+                    autocomplete="username"
+                >
                 <mat-icon matPrefix>person</mat-icon>
             </mat-form-field>
+
             <p class="texto">Senha</p>
             <mat-form-field appearance="fill" class="input-box">
-                <input matInput>
+                <input 
+                    matInput 
+                    type="password" 
+                    [(ngModel)]="password" 
+                    name="password" 
+                    required
+                    autocomplete="current-password"
+                >
                 <mat-icon matPrefix>lock</mat-icon>
             </mat-form-field>
-            <a href="" id="e-senha">Esqueceu a senha?</a>
-            <button id="entrar-btn" mat-raised-button>Entrar</button>
+
+            <!-- <a href="" id="e-senha">Esqueceu a senha?</a> -->
+            
+            <button 
+                id="entrar-btn" 
+                mat-raised-button 
+                type="submit"
+                [disabled]="!username || !password"
+            >
+                Entrar
+            </button>
         </form>
     </div>
 </section>

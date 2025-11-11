@@ -12,6 +12,8 @@ import { AdmPagamentosComponent } from './admin/pages/adm-pagamentos/adm-pagamen
 import { ConfirmacaoComponent } from './pages/confirmacao/confirmacao.component';
 import { ResumoPacoteComponent } from './pages/resumo-pacote/resumo-pacote.component';
 
+import { AuthGuard } from './guards/auth.guard';
+
 export const routes: Routes = [
   { path: 'home', component: HomeComponent },
   { path: 'cardapio', component: CardapioComponent },
@@ -19,10 +21,26 @@ export const routes: Routes = [
   { path: 'pacotes', component: PacotesComponent },
   { path: 'reservas', component: ReservasComponent },
   { path: 'admin-panel', component: AdminPanelComponent},
-  { path: 'admin-panel/relatorios', component: AdmRelatoriosComponent},
-  { path: 'admin-panel/reservas', component: AdmReservasComponent},
-  { path: 'admin-panel/pacotes', component: AdmPacotesComponent},
-  { path: 'admin-panel/pagamentos', component: AdmPagamentosComponent},
+  { 
+    path: 'admin-panel/relatorios', 
+    component: AdmRelatoriosComponent,
+    canActivate: [AuthGuard]
+  },
+  { 
+    path: 'admin-panel/reservas', 
+    component: AdmReservasComponent,
+    canActivate: [AuthGuard]
+  },
+  { 
+    path: 'admin-panel/pacotes', 
+    component: AdmPacotesComponent,
+    canActivate: [AuthGuard]
+  },
+  { 
+    path: 'admin-panel/pagamentos', 
+    component: AdmPagamentosComponent,
+    canActivate: [AuthGuard]
+  },
   { path: 'confirmacao', component: ConfirmacaoComponent },
   { path: 'resumo-pacote', component: ResumoPacoteComponent },
   { path: '', redirectTo: '/home', pathMatch: 'full' },
