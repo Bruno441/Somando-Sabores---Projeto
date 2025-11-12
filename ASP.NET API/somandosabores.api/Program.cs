@@ -53,15 +53,13 @@ builder.Services.AddScoped<IAsaasService, AsaasService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+// Swagger habilitado em todos os ambientes para facilitar testes
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "API V1");
-        c.RoutePrefix = string.Empty;
-    });
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Somando Sabores API V1");
+    c.RoutePrefix = "swagger";
+});
 
 app.UseCors("AllowSpecificOrigin");
 
