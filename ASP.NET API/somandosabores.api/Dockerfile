@@ -1,5 +1,4 @@
 ﻿FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-USER $APP_UID
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
@@ -7,11 +6,19 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["somandosabores.api/somandosabores.api.csproj", "somandosabores.api/"]
-COPY ["infra/infra.csproj", "infra/"]
-COPY ["domain/domain.csproj", "domain/"]
+
+# Copiar apenas os arquivos de projeto primeiro para aproveitar o cache
+COPY ["ASP.NET API/somandosabores.api/somandosabores.api.csproj", "somandosabores.api/"]
+COPY ["ASP.NET API/infra/infra.csproj", "infra/"]
+COPY ["ASP.NET API/domain/domain.csproj", "domain/"]
+
+# Restaurar dependências
 RUN dotnet restore "somandosabores.api/somandosabores.api.csproj"
-COPY . .
+
+# Copiar o resto dos arquivos
+COPY ["ASP.NET API/", "."]
+
+# Build
 WORKDIR "/src/somandosabores.api"
 RUN dotnet build "somandosabores.api.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
