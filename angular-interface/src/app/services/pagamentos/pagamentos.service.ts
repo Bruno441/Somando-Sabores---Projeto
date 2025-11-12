@@ -8,7 +8,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class PagamentosService {
-  private urlApi = 'http://localhost:5000/api/Pagamento';
+  private urlApi = 'https://somando-sabores-api.onrender.com/api/Pagamento';
 
   constructor(private http: HttpClient) { }
 
