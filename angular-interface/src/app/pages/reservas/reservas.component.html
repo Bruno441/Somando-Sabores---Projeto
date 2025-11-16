@@ -65,14 +65,23 @@
     <!-- Modal do Resumo -->
     <div id="modal-resumo" class="modal" *ngIf="showModal">
       <div class="modal-content">
-        <span class="close-button" (click)="fecharResumo()">×</span>
+        <span class="close-button" (click)="fecharResumo()" *ngIf="!isLoading">×</span>
         <h3>Resumo da reserva</h3>
         <hr>
         <p id="resumo-detalhes">{{ guestCount }} reservas</p>
         <p>Subtotal <strong id="subtotal">R$ {{ subtotal.toFixed(2) }}</strong></p>
         <hr>
         <p>Total <strong id="total">R$ {{ total.toFixed(2) }}</strong></p>
-        <button class="modal-button" type="submit">Prosseguir para pagamento</button>
+        
+        <!-- Loading spinner -->
+        <div *ngIf="isLoading" class="loading-container">
+          <div class="spinner"></div>
+          <p>Processando sua reserva...</p>
+        </div>
+        
+        <button class="modal-button" type="submit" [disabled]="isLoading" *ngIf="!isLoading">
+          Prosseguir para pagamento
+        </button>
       </div>
     </div>
   </div>

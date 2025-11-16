@@ -41,7 +41,8 @@ export class ReservasComponent implements OnInit {
   total: number = 0;
   wantInvoice: boolean = false;
   nextSaturdayDate: string = ''; // Nova propriedade para armazenar a data do próximo sábado
-  nextSaturdayDateISO: string = ''; 
+  nextSaturdayDateISO: string = '';
+  isLoading: boolean = false; // Controla o estado de loading 
 
   // private apiUrl = '/api/v3';
   // private accessToken = environment.accessToken; 
@@ -115,6 +116,9 @@ export class ReservasComponent implements OnInit {
     if(form.invalid){
       Object.values(form.controls).forEach(control => control.markAsTouched());
     } else {
+      // Ativa o loading
+      this.isLoading = true;
+      
       const dadosReserva: Reserva = form.value;
       dadosReserva.nomesConvidados = [];
       dadosReserva.dataReserva = this.nextSaturdayDateISO;
@@ -125,24 +129,25 @@ export class ReservasComponent implements OnInit {
         dadosReserva.nomesConvidados.push(guest.nome);
       });
       
-      // console.log("Dados da reserva: ", dadosReserva);
       this.reservaService.create(dadosReserva).subscribe({
         next: (response: any) => {
           console.log('Resposta completa do backend:', response);
-          alert(` Reserva cadastrada com sucesso! `);
           
           // Verificar se a invoiceUrl existe na resposta
           if (response && response.data.invoiceUrl) {
-            console.log('URL da fatura encontrada:', response.invoiceUrl);
+            console.log('URL da fatura encontrada:', response.data.invoiceUrl);
+            // Redireciona direto para o Asaas sem alert
             window.location.href = response.data.invoiceUrl;
           } else {
             console.log('invoiceUrl não encontrada na resposta');
-            // this.router.navigate(['/confirmacao']);
+            this.isLoading = false;
+            alert('Erro: URL de pagamento não foi retornada.');
           }
         },
         error: (msgErro) => {
           console.error('Erro completo:', msgErro);
-          alert(msgErro.error.message);
+          this.isLoading = false;
+          alert(msgErro.error.message || 'Erro ao processar reserva. Tente novamente.');
         }
       });
     }
