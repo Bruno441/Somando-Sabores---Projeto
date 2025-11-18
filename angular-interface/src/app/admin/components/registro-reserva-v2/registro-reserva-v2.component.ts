@@ -1,9 +1,4 @@
-  formatarData(data: string): string {
-    if (!data) return '';
-    const d = new Date(data);
-    if (isNaN(d.getTime())) return data;
-    return d.toLocaleDateString('pt-BR');
-  }
+// Função formatarData removida daqui, pois deve estar apenas dentro da classe
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon'
 import { Reserva } from '../../../models/ReservaModel';
