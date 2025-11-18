@@ -12,14 +12,20 @@
             </div>
             <hr/>
         </header>
-        <app-filter-results (filtroChange)="aplicarFiltro($event)"></app-filter-results>
-        <div *ngIf="pagamentos.length === 0">
-            <p>Nenhum pagamento localizado ainda.</p>
-        </div>
-        <div *ngFor="let pagamento of pagamentosFiltrados; trackBy: trackByPagamentoId">
-            <app-registro-pagamento [pagamento]="pagamento">
-            </app-registro-pagamento>
-        </div>
+                <app-filter-results (filtroChange)="aplicarFiltro($event)"></app-filter-results>
+                <div *ngIf="isLoading" class="loading-container">
+                    <div class="spinner"></div>
+                    <p>Carregando pagamentos...</p>
+                </div>
+                <div *ngIf="!isLoading && pagamentos.length === 0">
+                        <p>Nenhum pagamento localizado ainda.</p>
+                </div>
+                <div *ngIf="!isLoading">
+                    <div *ngFor="let pagamento of pagamentosFiltrados; trackBy: trackByPagamentoId">
+                            <app-registro-pagamento [pagamento]="pagamento">
+                            </app-registro-pagamento>
+                    </div>
+                </div>
     </div>
 </div>
 

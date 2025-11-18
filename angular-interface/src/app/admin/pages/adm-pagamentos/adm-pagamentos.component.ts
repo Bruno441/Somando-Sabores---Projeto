@@ -13,8 +13,10 @@ import { PagamentosService } from '../../../services/pagamentos/pagamentos.servi
   templateUrl: './adm-pagamentos.component.html',
   styleUrl: './adm-pagamentos.component.scss'
 })
+
 export class AdmPagamentosComponent implements OnInit{
   pagamentos: Pagamento[] = [];
+  isLoading: boolean = false;
 
   constructor(private pagamentoService: PagamentosService) {}
 
@@ -23,10 +25,17 @@ export class AdmPagamentosComponent implements OnInit{
   }
 
   carregarPagamentos(): void {
+    this.isLoading = true;
     this.pagamentoService.getAll().subscribe(
       (response: ServiceResponse<Pagamento[]>) => {
+        this.isLoading = false;
         if (response.success && response.data){
-          this.pagamentos = response.data;
+          // Ordena do mais recente para o mais antigo
+          this.pagamentos = response.data.sort((a, b) => {
+            const dataA = new Date(a.dataPagamento).getTime();
+            const dataB = new Date(b.dataPagamento).getTime();
+            return dataB - dataA;
+          });
           this.pagamentosFiltrados = this.pagamentos;
         } else {
           console.error(`Erro na resposta da API: ${response.message}`);
@@ -35,6 +44,7 @@ export class AdmPagamentosComponent implements OnInit{
         }
       },
       error => {
+        this.isLoading = false;
         console.error(`Erro ao carregar pagamentos: ${error}`)
         this.pagamentos = [];
         this.pagamentosFiltrados = this.pagamentos;

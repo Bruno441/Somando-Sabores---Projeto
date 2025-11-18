@@ -30,11 +30,12 @@ body {
 }
 
 /* Estilo do cardápio */
+
 .cardapio {
     margin: auto;
     max-width: 80%;
     background-color: #fff;
-    padding: 120px 50px 50px;
+    padding: 40px 50px 50px; /* Reduzido o padding-top de 120px para 40px */
     border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
@@ -43,7 +44,7 @@ body {
     font-size: 40px;
     color: #1C4D26;
     text-align: center;
-    margin: 40px 0 20px;
+    margin: 10px 0 20px; /* Reduzido o margin-top de 40px para 10px */
     font-weight: lighter;
 }
 

@@ -14,9 +14,10 @@ import { ServiceResponse } from '../../../models/ServiceResponseModel';
   templateUrl: './adm-reservas.component.html',
   styleUrl: './adm-reservas.component.scss'
 })
+
 export class AdmReservasComponent implements OnInit{
   reservas: Reserva[] = [];
-    
+  isLoading: boolean = false;
   reservaParaExcluirId: string | null = null;
   mostrarConfirmacaoExclusao: boolean = false;
 
@@ -27,8 +28,10 @@ export class AdmReservasComponent implements OnInit{
   }
 
   carregarReservas(): void {
+    this.isLoading = true;
     this.reservaService.getAll().subscribe(
       (response: ServiceResponse<Reserva[]>) => {
+        this.isLoading = false;
         if (response.success && response.data){
           this.reservas = response.data;
           this.reservasFiltradas = this.reservas;
@@ -39,6 +42,7 @@ export class AdmReservasComponent implements OnInit{
         }
       },
       error => {
+        this.isLoading = false;
         console.error(`Erro ao carregar reservas: ${error}`);
         this.reservas = [];
         this.reservasFiltradas = this.reservas;
