@@ -30,12 +30,12 @@
                             (click)="$event.stopPropagation()"
                             (keydown.space)="$event.stopImmediatePropagation()"
                             />
-                    <input id="dataReserva"
-                            [(ngModel)]="localReserva.dataReserva"
-                            [readonly]="!modoEdicao"
-                            (click)="$event.stopPropagation()"
-                            (keydown.space)="$event.stopImmediatePropagation()"
-                            />
+            <input id="dataReserva"
+                [value]="formatarData(localReserva.dataReserva)"
+                [readonly]="true"
+                (click)="$event.stopPropagation()"
+                (keydown.space)="$event.stopImmediatePropagation()"
+                />
                 </div>
             </section>
             <div class="icons">

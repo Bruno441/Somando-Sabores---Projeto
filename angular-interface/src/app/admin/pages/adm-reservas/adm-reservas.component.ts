@@ -58,9 +58,7 @@ export class AdmReservasComponent implements OnInit{
     this.reservaService.update(reservaAtualizada).subscribe(
       response => {
         if (response.success){
-          this.reservas = this.reservas.map(reserva =>
-            reserva.id === reservaAtualizada.id ? reservaAtualizada : reserva
-          );
+          this.carregarReservas(); // Atualiza a lista após edição
         } else {
           console.error(`Erro ao atualizar reserva: ${response.message}`);
         }
@@ -79,7 +77,7 @@ export class AdmReservasComponent implements OnInit{
 
     this.reservaService.delete(this.reservaParaExcluirId).subscribe(
       response => {
-        this.reservas = this.reservas.filter(r => r.id !== this.reservaParaExcluirId);
+        this.carregarReservas(); // Atualiza a lista após exclusão
         this.fecharConfirmacao();
         console.log('Reserva excluída com sucesso!')
       },

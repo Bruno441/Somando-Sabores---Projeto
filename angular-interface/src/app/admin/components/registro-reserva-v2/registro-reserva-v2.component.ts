@@ -1,3 +1,9 @@
+  formatarData(data: string): string {
+    if (!data) return '';
+    const d = new Date(data);
+    if (isNaN(d.getTime())) return data;
+    return d.toLocaleDateString('pt-BR');
+  }
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon'
 import { Reserva } from '../../../models/ReservaModel';
@@ -41,5 +47,12 @@ export class RegistroReservaV2Component {
     } else {
       console.warn('ID da reserva não disponível para exclusão.');
     }
+  }
+
+  formatarData(data: string): string {
+    if (!data) return '';
+    const d = new Date(data);
+    if (isNaN(d.getTime())) return data;
+    return d.toLocaleDateString('pt-BR');
   }
 }

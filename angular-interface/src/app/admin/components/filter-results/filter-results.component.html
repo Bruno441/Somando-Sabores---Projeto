@@ -1,23 +1,11 @@
-<mat-accordion>
-    <mat-expansion-panel hideToggle>
-        <mat-expansion-panel-header class="filter-section">
-            <span>Filtrar resultados</span>
-            <mat-icon>filter_list</mat-icon>
-        </mat-expansion-panel-header>
-        <section class="filter-box">
-            <div class="label-input">
-                <span id="text-data">Data</span>
-                <label for="data_filtro">
-                    <input type="date" id="data_filtro" alt="filtro de data" [(ngModel)]="data" (change)="emitirFiltro()"/>
-                </label>
-            </div>
-            <div class="label-input">
-                <span id="txt-resp">Responsável</span>
-                <label for="responsavel">
-                    <input type="text" id="responsavel" alt="responsavel" [(ngModel)]="nome" (input)="emitirFiltro()"/>
-                </label>
-                <mat-icon>search</mat-icon>
-            </div>
-        </section>
-    </mat-expansion-panel>
-</mat-accordion>
+<section class="filter-bar">
+  <div class="filter-field">
+    <label for="data_filtro">Data</label>
+    <input type="date" id="data_filtro" alt="filtro de data" [(ngModel)]="data" (change)="emitirFiltro()"/>
+  </div>
+  <div class="filter-field">
+    <label for="responsavel">Responsável</label>
+    <input type="text" id="responsavel" alt="responsavel" [(ngModel)]="nome" (input)="emitirFiltro()"/>
+    <mat-icon>search</mat-icon>
+  </div>
+</section>
