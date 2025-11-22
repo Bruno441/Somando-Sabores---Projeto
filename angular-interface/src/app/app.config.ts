@@ -7,6 +7,7 @@ import { CommonModule } from '@angular/common';
 import { routes } from './app.routes';
 import { provideNgxMask } from 'ngx-mask';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import { MAT_DATE_LOCALE } from '@angular/material/core';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -16,6 +17,7 @@ export const appConfig: ApplicationConfig = {
     importProvidersFrom(FormsModule),
     importProvidersFrom(CommonModule),
     provideNgxMask(),
-    provideAnimationsAsync()
+    provideAnimationsAsync(),
+    { provide: MAT_DATE_LOCALE, useValue: 'pt-BR' }
   ]
 };

@@ -9,4 +9,5 @@ export interface Reserva {
     nomesConvidados: string[];
     total: number;
     invoiceUrl: string;
+    status: number; // 0 = Pendente, 1 = Confirmado/Pago
 }

@@ -1,9 +1,9 @@
 .filter-bar {
   background: #ffffff;
-  border-radius: 8px; /* Slightly tighter radius */
-  padding: 12px 20px; /* Reduced padding for a "thinner" look */
-  margin: 0 0 20px 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); /* Softer shadow */
+  border-radius: 8px;
+  padding: 8px 16px; /* Reduced padding for "finer" look */
+  margin: 0 0 16px 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03); /* Lighter shadow */
   width: 95%;
   margin-inline: auto;
   border: 1px solid rgba(0, 0, 0, 0.03);
@@ -13,53 +13,77 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   flex-wrap: wrap;
 }
 
-/* Base styles for fields to ensure they respect the "compact" sizing */
+/* Base styles for fields */
 .compact-field {
-  font-size: 14px;
+  font-size: 13px; /* Smaller font */
 }
 
-/* Material overrides for density/compactness are often handled by density mixins in global styles,
-   but we can locally adjust height if density isn't globally set.
-   With subscriptSizing="dynamic", the height is already much better. */
+/* Override Material Form Field to be shorter */
+::ng-deep .compact-field .mat-mdc-form-field-flex {
+    height: 40px !important;
+    align-items: center !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+::ng-deep .compact-field .mat-mdc-text-field-wrapper {
+    height: 40px !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+::ng-deep .compact-field .mat-mdc-form-field-infix {
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+    min-height: 40px !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+/* Fix label position if needed */
+::ng-deep .compact-field .mat-mdc-floating-label {
+   top: 10px !important;
+}
 
 .search-field {
-  flex: 2; /* Takes more space */
-  min-width: 240px;
+  flex: 2;
+  min-width: 200px;
 }
 
 .date-field {
   flex: 1;
-  min-width: 160px;
+  min-width: 140px;
 }
 
 .search-icon {
-  color: #757575;
+  color: #9e9e9e;
+  font-size: 20px; /* Smaller icon */
 }
 
 .actions {
   display: flex;
   align-items: center;
-  margin-left: auto; /* Pushes the button to the right end if space permits */
+  margin-left: auto;
 }
 
 .clear-btn {
-  height: 40px; /* Match standard compact input height roughly */
-  border-radius: 20px; /* Pill shape for elegance */
+  height: 36px; /* Reduced height */
+  border-radius: 18px;
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  font-size: 12px;
+  font-size: 11px;
 }
 
 @media (max-width: 768px) {
   .filter-content {
     flex-direction: column;
     align-items: stretch;
-    gap: 12px;
+    gap: 8px;
   }
 
   .search-field, .date-field {

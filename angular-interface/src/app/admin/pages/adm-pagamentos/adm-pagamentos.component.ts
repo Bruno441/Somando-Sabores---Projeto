@@ -5,7 +5,9 @@ import { FilterResultsComponent } from '../../components/filter-results/filter-r
 import { Component, OnInit } from '@angular/core';
 import { ServiceResponse } from '../../../models/ServiceResponseModel';
 import { Pagamento } from '../../../models/PagamentoModel';
-import { PagamentosService } from '../../../services/pagamentos/pagamentos.service';
+// Import ReservaService to filter paid reservations
+import { ReservaService } from '../../../services/reservas/reserva.service';
+import { Reserva } from '../../../models/ReservaModel';
 
 @Component({
   selector: 'app-adm-pagamentos',
@@ -18,7 +20,7 @@ export class AdmPagamentosComponent implements OnInit{
   pagamentos: Pagamento[] = [];
   isLoading: boolean = false;
 
-  constructor(private pagamentoService: PagamentosService) {}
+  constructor(private reservaService: ReservaService) {}
 
   ngOnInit(): void {
     this.carregarPagamentos();
@@ -26,16 +28,35 @@ export class AdmPagamentosComponent implements OnInit{
 
   carregarPagamentos(): void {
     this.isLoading = true;
-    this.pagamentoService.getAll().subscribe(
-      (response: ServiceResponse<Pagamento[]>) => {
+
+    // Using ReservaService to fetch all reservations and filter for "Paid" status (1)
+    // Then mapping them to Pagamento model for display
+    this.reservaService.getAll().subscribe(
+      (response: ServiceResponse<Reserva[]>) => {
         this.isLoading = false;
         if (response.success && response.data){
-          // Ordena do mais recente para o mais antigo
-          this.pagamentos = response.data.sort((a, b) => {
-            const dataA = new Date(a.dataPagamento).getTime();
-            const dataB = new Date(b.dataPagamento).getTime();
-            return dataB - dataA;
+          // 1. Filter for status === 1 (Paid)
+          const reservasPagas = response.data.filter(r => r.status === 1);
+
+          // 2. Map to Pagamento structure
+          this.pagamentos = reservasPagas.map(r => ({
+            id: r.id,
+            // Use dataReserva or infer update time. Since backend doesn't give payment date in ReservaDTO,
+            // we use dataReserva as the best available proxy or display blank/today if needed.
+            // Ideally backend should provide this.
+            dataPagamento: r.dataReserva,
+            nome: r.nome,
+            valorTotal: r.total
+          }));
+
+          // 3. Sort by most recent (assuming recent DataReserva implies recent activity,
+          // or sorting by ID if that correlates with time, but DataReserva is safer)
+          this.pagamentos.sort((a, b) => {
+             const dataA = new Date(a.dataPagamento).getTime();
+             const dataB = new Date(b.dataPagamento).getTime();
+             return dataB - dataA;
           });
+
           this.pagamentosFiltrados = this.pagamentos;
         } else {
           console.error(`Erro na resposta da API: ${response.message}`);
@@ -45,7 +66,7 @@ export class AdmPagamentosComponent implements OnInit{
       },
       error => {
         this.isLoading = false;
-        console.error(`Erro ao carregar pagamentos: ${error}`)
+        console.error(`Erro ao carregar pagamentos (reservas pagas): ${error}`)
         this.pagamentos = [];
         this.pagamentosFiltrados = this.pagamentos;
       }
