@@ -1,21 +1,49 @@
 <section class="filter-bar">
   <div class="filter-content">
-    <mat-form-field appearance="outline" class="search-field">
+
+    <!-- Campo de Busca por Nome -->
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="compact-field search-field">
       <mat-label>Responsável</mat-label>
-      <input matInput [(ngModel)]="nome" (input)="emitirFiltro()" placeholder="Nome do responsável">
-      <mat-icon matSuffix>search</mat-icon>
+      <input matInput [(ngModel)]="nome" (input)="emitirFiltro()" placeholder="Buscar por nome">
+
+      <!-- Botão X para limpar apenas o nome se houver texto -->
+      <button
+        mat-icon-button
+        matSuffix
+        *ngIf="nome"
+        (click)="limparNome()"
+        aria-label="Limpar nome"
+        matTooltip="Limpar busca"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+
+      <!-- Ícone de lupa se estiver vazio -->
+      <mat-icon matSuffix *ngIf="!nome" class="search-icon">search</mat-icon>
     </mat-form-field>
 
-    <mat-form-field appearance="outline" class="date-field">
-      <mat-label>Data</mat-label>
-      <input matInput [matDatepicker]="picker" [(ngModel)]="data" (dateChange)="emitirFiltro()">
+    <!-- Campo de Data -->
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="compact-field date-field">
+      <mat-label>Data da Reserva</mat-label>
+      <input matInput [matDatepicker]="picker" [(ngModel)]="data" (dateChange)="emitirFiltro()" readonly>
       <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
       <mat-datepicker #picker></mat-datepicker>
     </mat-form-field>
 
-    <button mat-button color="warn" (click)="limparFiltro()" *ngIf="nome || data">
-      <mat-icon>close</mat-icon>
-      Limpar
-    </button>
+    <!-- Botão de Limpar Filtros Global -->
+    <div class="actions">
+      <button
+        mat-stroked-button
+        color="warn"
+        (click)="limparFiltro()"
+        [disabled]="!nome && !data"
+        class="clear-btn"
+        matTooltip="Limpar todos os filtros"
+      >
+        <mat-icon>delete_sweep</mat-icon>
+        Limpar Filtros
+      </button>
+    </div>
+
   </div>
 </section>

@@ -7,18 +7,22 @@ import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatButtonModule } from '@angular/material/button';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-filter-results',
   standalone: true,
   imports: [
+    CommonModule,
     MatIconModule,
     MatExpansionModule,
     FormsModule,
     MatFormFieldModule,
     MatInputModule,
     MatDatepickerModule,
-    MatButtonModule
+    MatButtonModule,
+    MatTooltipModule
   ],
   providers: [provideNativeDateAdapter()],
   templateUrl: './filter-results.component.html',
@@ -33,7 +37,6 @@ export class FilterResultsComponent {
   emitirFiltro() {
     let dataFormatada = '';
     if (this.data) {
-      // Formata para YYYY-MM-DD para manter compatibilidade com o filtro existente
       const ano = this.data.getFullYear();
       const mes = String(this.data.getMonth() + 1).padStart(2, '0');
       const dia = String(this.data.getDate()).padStart(2, '0');
@@ -46,6 +49,11 @@ export class FilterResultsComponent {
   limparFiltro() {
     this.nome = '';
     this.data = null;
+    this.emitirFiltro();
+  }
+
+  limparNome() {
+    this.nome = '';
     this.emitirFiltro();
   }
 }

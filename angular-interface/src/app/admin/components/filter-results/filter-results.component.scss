@@ -1,12 +1,12 @@
 .filter-bar {
   background: #ffffff;
-  border-radius: 12px;
-  padding: 16px 24px;
-  margin: 0 0 24px 0;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border-radius: 8px; /* Slightly tighter radius */
+  padding: 12px 20px; /* Reduced padding for a "thinner" look */
+  margin: 0 0 20px 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); /* Softer shadow */
   width: 95%;
   margin-inline: auto;
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.03);
 }
 
 .filter-content {
@@ -17,30 +17,49 @@
   flex-wrap: wrap;
 }
 
-mat-form-field {
-  width: 100%;
+/* Base styles for fields to ensure they respect the "compact" sizing */
+.compact-field {
+  font-size: 14px;
 }
 
+/* Material overrides for density/compactness are often handled by density mixins in global styles,
+   but we can locally adjust height if density isn't globally set.
+   With subscriptSizing="dynamic", the height is already much better. */
+
 .search-field {
-  flex: 2;
-  min-width: 200px;
+  flex: 2; /* Takes more space */
+  min-width: 240px;
 }
 
 .date-field {
   flex: 1;
-  min-width: 150px;
+  min-width: 160px;
 }
 
-button {
-  height: 56px; /* Match default form field height */
-  margin-bottom: 22px; /* Align with form fields which have subscript space */
+.search-icon {
+  color: #757575;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  margin-left: auto; /* Pushes the button to the right end if space permits */
+}
+
+.clear-btn {
+  height: 40px; /* Match standard compact input height roughly */
+  border-radius: 20px; /* Pill shape for elegance */
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 12px;
 }
 
 @media (max-width: 768px) {
   .filter-content {
     flex-direction: column;
     align-items: stretch;
-    gap: 0;
+    gap: 12px;
   }
 
   .search-field, .date-field {
@@ -48,8 +67,12 @@ button {
     flex: none;
   }
 
-  button {
-    margin-bottom: 0;
-    margin-top: 8px;
+  .actions {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .clear-btn {
+    width: 100%;
   }
 }
