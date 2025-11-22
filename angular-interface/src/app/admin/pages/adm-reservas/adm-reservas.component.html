@@ -1,39 +1,58 @@
-<div class="main">
-    <app-side-bar></app-side-bar>
-    <div class="margem">
-        <header>
-            <div class="title">
-                <h1>Reservas</h1>
-                <mat-icon (click)="foo()">download</mat-icon>
-            </div>
-            <hr/>
-        </header>
-        <app-filter-results (filtroChange)="aplicarFiltro($event)"></app-filter-results>
-        <div *ngIf="isLoading" class="loading-container">
-          <div class="spinner"></div>
-          <p>Carregando reservas...</p>
-        </div>
-        <div *ngIf="!isLoading && reservas.length === 0">
-            <p>Nenhuma reserva cadastrada ainda.</p>
-        </div>
-        <div *ngIf="!isLoading" >
-          <div *ngFor="let reserva of reservasFiltradas; trackBy: trackByReservaId">
-              <app-registro-reserva-v2 
-                [reserva]="reserva"
-                (atualizarReserva)="onReservaAtualizada($event)"
-                (deletarReserva)="onSolicitarExclusao($event)">
-              </app-registro-reserva-v2>
-          </div>
-        </div>
+<div class="page-container">
+  <app-side-bar class="sidebar"></app-side-bar>
+  
+  <div class="sidebar-spacer"></div>
+
+  <main class="content-area">
+    
+    <header class="page-header">
+      <div class="header-title">
+        <h1>Gerenciamento de Reservas</h1>
+        <button mat-icon-button class="export-btn" (click)="exportarRelatorio()" matTooltip="Baixar Relatório CSV">
+          <mat-icon>download</mat-icon>
+        </button>
+      </div>
+      <mat-divider></mat-divider>
+    </header>
+
+    <section class="filter-section">
+      <app-filter-results (filtroChange)="aplicarFiltro($event)"></app-filter-results>
+    </section>
+
+    <div *ngIf="isLoading" class="state-message loading">
+      <mat-spinner diameter="50" color="primary"></mat-spinner>
+      <p>Carregando reservas...</p>
     </div>
+
+    <div *ngIf="!isLoading && reservasFiltradas.length === 0" class="state-message empty">
+      <mat-icon>event_busy</mat-icon>
+      <p>Nenhuma reserva encontrada.</p>
+    </div>
+
+    <div *ngIf="!isLoading && reservasFiltradas.length > 0" class="reservations-list">
+      <div *ngFor="let reserva of reservasFiltradas; trackBy: trackByReservaId" class="reserva-item-wrapper">
+        <app-registro-reserva-v2 
+          [reserva]="reserva"
+          (atualizarReserva)="onReservaAtualizada($event)"
+          (deletarReserva)="onSolicitarExclusao($event)">
+        </app-registro-reserva-v2>
+      </div>
+    </div>
+
+  </main>
 </div>
-<div *ngIf="mostrarConfirmacaoExclusao" class="confirmacao-modal">
-  <div class="conteudo-modal">
-    <p>Tem certeza que deseja excluir esta reserva?</p>
-    <div class="btn-section">
-      <button (click)="confirmarExclusao()" class="btn danger">Sim</button>
-      <button (click)="fecharConfirmacao()" class="btn normal">Não</button>
+
+<div *ngIf="mostrarConfirmacaoExclusao" class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>Confirmar Exclusão</h3>
+    </div>
+    <div class="modal-body">
+      <p>Tem certeza que deseja excluir esta reserva permanentemente?</p>
+    </div>
+    <div class="modal-footer">
+      <button mat-button (click)="fecharConfirmacao()">Cancelar</button>
+      <button mat-flat-button color="warn" (click)="confirmarExclusao()">Sim, Excluir</button>
     </div>
   </div>
 </div>
-

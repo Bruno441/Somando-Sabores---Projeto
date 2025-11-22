@@ -92,11 +92,18 @@ export class AdmPacotesComponent implements OnInit{
 
   pacotesFiltrados: Pacote[] = this.pacotes;
 
-  aplicarFiltro(filtro: { nome: string; data: string }) {
-    this.pacotesFiltrados = this.pacotes.filter(p =>
-      (!filtro.nome || p.nome?.toLowerCase().includes(filtro.nome.toLowerCase())) &&
-      (!filtro.data || p.dataInicio.includes(filtro.data))
-    );
-  }
+  aplicarFiltro(filtro: { nome: string; data: string | null }) {
+    this.pacotesFiltrados = this.pacotes.filter(p => {
+      const termoNome = filtro.nome ? filtro.nome.toLowerCase() : '';
+      const termoData = filtro.data || '';
 
+      // Verifica nome (Safe check com ?.)
+      const matchNome = !termoNome || (p.nome && p.nome.toLowerCase().includes(termoNome));
+      
+      // Verifica data
+      const matchData = !termoData || (p.dataInicio && p.dataInicio.includes(termoData));
+
+      return matchNome && matchData;
+    });
+  }
 }

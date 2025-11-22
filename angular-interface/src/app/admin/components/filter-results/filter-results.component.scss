@@ -1,69 +1,63 @@
-@import url('https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&display=swap');
+.filter-card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 20px 24px;
+  box-shadow: 0 2px 8px rgba(28, 77, 38, 0.08); 
+  margin-bottom: 24px;
+  border: 1px solid #e0e0e0;
 
-/* Barra de filtro fixa e moderna */
-.filter-bar {
+  .filter-content {
     display: flex;
-    gap: 32px;
-    align-items: flex-end;
-    background: #f7f7f7;
-    border-radius: 8px;
-    padding: 18px 24px 10px 24px;
-    margin: 0 0 24px 0;
-    box-shadow: 0 2px 8px rgba(28,77,38,0.07);
-    width: 95%;
-    margin-inline: auto;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: center;
+  }
 }
 
-.filter-field {
-    display: flex;
+.search-field {
+  flex: 2;
+  min-width: 280px;
+}
+
+.date-field {
+  flex: 1;
+  min-width: 180px;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  height: 56px; 
+  margin-bottom: 22px; // Compensação visual do padding do input
+}
+
+@media (max-width: 768px) {
+  .filter-content {
     flex-direction: column;
-    gap: 6px;
+    align-items: stretch;
+
+    .search-field, .date-field, .actions button {
+      width: 100%;
+    }
+    
+    .actions {
+      margin-bottom: 0;
+      height: auto;
+    }
+  }
 }
 
-.filter-field label {
-    font-size: 15px;
-    color: #1C4D26;
-    font-weight: 500;
-    margin-bottom: 2px;
-}
-
-.filter-field input[type="date"],
-.filter-field input[type="text"] {
-    padding: 6px 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 15px;
-    font-family: inherit;
-    outline: none;
-    transition: border 0.2s;
-}
-
-.filter-field input:focus {
-    border-color: #1C4D26;
-}
-
-.filter-field mat-icon {
-    margin-left: 6px;
-    color: #1C4D26;
-    vertical-align: middle;
-    border-color: rgba(15, 38, 20, 0.5);
-    margin-bottom: 1.8vh;
-    width: 8vw;
-    font-family: 'IM FEEL English', 'serif';
-}
-
-#data_filtro{
-    background-color: #eee;
-    font-family: 'IM FEEL English', 'serif';
-    width: 6.5vw;
-    height: 3vh;
-    border: none;
-}
-
-#responsavel:focus, #data_filtro:focus{
-    outline: none;
-}
-
-mat-icon{
-    color: #0F2614;
+// Cores customizadas para o verde da sua marca (#1C4D26)
+:host ::ng-deep {
+  .mdc-text-field--focused:not(.mdc-text-field--disabled) .mdc-notched-outline__leading,
+  .mdc-text-field--focused:not(.mdc-text-field--disabled) .mdc-notched-outline__notch,
+  .mdc-text-field--focused:not(.mdc-text-field--disabled) .mdc-notched-outline__trailing {
+    border-color: #1C4D26 !important;
+  }
+  .mdc-text-field--focused:not(.mdc-text-field--disabled) .mdc-floating-label {
+    color: #1C4D26 !important;
+  }
+  .mat-datepicker-toggle-active {
+    color: #1C4D26 !important;
+  }
 }

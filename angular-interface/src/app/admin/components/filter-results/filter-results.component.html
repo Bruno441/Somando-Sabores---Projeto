@@ -1,11 +1,29 @@
-<section class="filter-bar">
-  <div class="filter-field">
-    <label for="data_filtro">Data</label>
-    <input type="date" id="data_filtro" alt="filtro de data" [(ngModel)]="data" (change)="emitirFiltro()"/>
-  </div>
-  <div class="filter-field">
-    <label for="responsavel">Responsável</label>
-    <input type="text" id="responsavel" alt="responsavel" [(ngModel)]="nome" (input)="emitirFiltro()"/>
-    <mat-icon>search</mat-icon>
-  </div>
-</section>
+<div class="filter-card">
+  <form [formGroup]="filterForm" class="filter-content">
+    
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Buscar por responsável</mat-label>
+      <mat-icon matPrefix>search</mat-icon>
+      <input matInput type="text" formControlName="nome" placeholder="Digite o nome">
+      
+      <button *ngIf="filterForm.get('nome')?.value" matSuffix mat-icon-button aria-label="Limpar" (click)="filterForm.get('nome')?.setValue('')">
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="date-field">
+      <mat-label>Filtrar por data</mat-label>
+      <input matInput [matDatepicker]="picker" formControlName="data" readonly (click)="picker.open()">
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+
+    <div class="actions">
+      <button mat-stroked-button color="warn" (click)="limparFiltros()" 
+              [disabled]="!filterForm.get('nome')?.value && !filterForm.get('data')?.value">
+        Limpar Filtros
+      </button>
+    </div>
+
+  </form>
+</div>

@@ -58,10 +58,18 @@ export class AdmPagamentosComponent implements OnInit{
 
   pagamentosFiltrados: Pagamento[] = this.pagamentos;
 
-  aplicarFiltro(filtro: { nome: string; data: string }) {
-    this.pagamentosFiltrados = this.pagamentos.filter(p =>
-      (!filtro.nome || p.nome?.toLowerCase().includes(filtro.nome.toLowerCase())) &&
-      (!filtro.data || p.dataPagamento.includes(filtro.data))
-    );
+  aplicarFiltro(filtro: { nome: string; data: string | null }) {
+    this.pagamentosFiltrados = this.pagamentos.filter(p => {
+      const termoNome = filtro.nome ? filtro.nome.toLowerCase() : '';
+      const termoData = filtro.data || '';
+
+      // Verifica nome
+      const matchNome = !termoNome || p.nome.toLowerCase().includes(termoNome);
+      
+      // Verifica data (Safe check para p.dataPagamento)
+      const matchData = !termoData || (p.dataPagamento && p.dataPagamento.includes(termoData));
+
+      return matchNome && matchData;
+    });
   }
 }
