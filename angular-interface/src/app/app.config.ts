@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { routes } from './app.routes';
 import { provideNgxMask } from 'ngx-mask';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -14,6 +15,7 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(),
     importProvidersFrom(FormsModule),
     importProvidersFrom(CommonModule),
-    provideNgxMask()
+    provideNgxMask(),
+    provideAnimationsAsync()
   ]
 };

@@ -1,11 +1,21 @@
 <section class="filter-bar">
-  <div class="filter-field">
-    <label for="data_filtro">Data</label>
-    <input type="date" id="data_filtro" alt="filtro de data" [(ngModel)]="data" (change)="emitirFiltro()"/>
-  </div>
-  <div class="filter-field">
-    <label for="responsavel">Responsável</label>
-    <input type="text" id="responsavel" alt="responsavel" [(ngModel)]="nome" (input)="emitirFiltro()"/>
-    <mat-icon>search</mat-icon>
+  <div class="filter-content">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Responsável</mat-label>
+      <input matInput [(ngModel)]="nome" (input)="emitirFiltro()" placeholder="Nome do responsável">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="date-field">
+      <mat-label>Data</mat-label>
+      <input matInput [matDatepicker]="picker" [(ngModel)]="data" (dateChange)="emitirFiltro()">
+      <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+
+    <button mat-button color="warn" (click)="limparFiltro()" *ngIf="nome || data">
+      <mat-icon>close</mat-icon>
+      Limpar
+    </button>
   </div>
 </section>
