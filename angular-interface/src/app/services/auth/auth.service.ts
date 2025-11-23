@@ -1,63 +1,64 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { Auth, signInWithEmailAndPassword, signOut, authState, User } from '@angular/fire/auth';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private isAuthenticatedSubject = new BehaviorSubject<boolean>(this.hasToken());
+  private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
   public isAuthenticated$: Observable<boolean> = this.isAuthenticatedSubject.asObservable();
+  private userSubject = new BehaviorSubject<User | null>(null);
 
-  // Credenciais hardcoded para o MVP (posteriormente integrar com backend)
-  private readonly ADMIN_USERNAME = 'admin';
-  private readonly ADMIN_PASSWORD = 'admin123';
-  private readonly TOKEN_KEY = 'auth_token';
-
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private auth: Auth
+  ) {
+    // Monitora o estado da autenticação do Firebase
+    authState(this.auth).subscribe((user: User | null) => {
+      this.userSubject.next(user);
+      this.isAuthenticatedSubject.next(!!user);
+    });
+  }
 
   /**
-   * Realiza o login do usuário
+   * Realiza o login do usuário via Firebase
    */
-  login(username: string, password: string): boolean {
-    // Validação simples (MVP)
-    if (username === this.ADMIN_USERNAME && password === this.ADMIN_PASSWORD) {
-      // Gera um token simples (posteriormente usar JWT do backend)
-      const token = btoa(`${username}:${Date.now()}`);
-      localStorage.setItem(this.TOKEN_KEY, token);
-      this.isAuthenticatedSubject.next(true);
-      return true;
+  async login(username: string, password: string): Promise<void> {
+    try {
+      await signInWithEmailAndPassword(this.auth, username, password);
+      // O authState vai atualizar automaticamente o isAuthenticatedSubject
+    } catch (error) {
+      console.error('Erro no login:', error);
+      throw error;
     }
-    return false;
   }
 
   /**
-   * Realiza o logout do usuário
+   * Realiza o logout do usuário via Firebase
    */
-  logout(): void {
-    localStorage.removeItem(this.TOKEN_KEY);
-    this.isAuthenticatedSubject.next(false);
-    this.router.navigate(['/admin-panel']);
+  async logout(): Promise<void> {
+    try {
+      await signOut(this.auth);
+      this.router.navigate(['/admin-panel']);
+    } catch (error) {
+      console.error('Erro no logout:', error);
+    }
   }
 
   /**
-   * Verifica se existe token no localStorage
-   */
-  private hasToken(): boolean {
-    return !!localStorage.getItem(this.TOKEN_KEY);
-  }
-
-  /**
-   * Verifica se o usuário está autenticado
+   * Verifica se o usuário está autenticado (baseado no último valor emitido)
+   * Para uso síncrono em Guards (embora Guards devam preferir Observables)
    */
   isAuthenticated(): boolean {
-    return this.hasToken();
+    return this.isAuthenticatedSubject.value;
   }
 
   /**
-   * Obtém o token atual
+   * Obtém o usuário atual
    */
-  getToken(): string | null {
-    return localStorage.getItem(this.TOKEN_KEY);
+  getUser(): User | null {
+    return this.userSubject.value;
   }
 }

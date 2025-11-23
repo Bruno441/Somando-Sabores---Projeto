@@ -8,6 +8,9 @@ import { routes } from './app.routes';
 import { provideNgxMask } from 'ngx-mask';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
+import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
+import { getAuth, provideAuth } from '@angular/fire/auth';
+import { environment } from '../environments/environment';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -18,6 +21,8 @@ export const appConfig: ApplicationConfig = {
     importProvidersFrom(CommonModule),
     provideNgxMask(),
     provideAnimationsAsync(),
-    { provide: MAT_DATE_LOCALE, useValue: 'pt-BR' }
+    { provide: MAT_DATE_LOCALE, useValue: 'pt-BR' },
+    provideFirebaseApp(() => initializeApp(environment.firebase)),
+    provideAuth(() => getAuth())
   ]
 };

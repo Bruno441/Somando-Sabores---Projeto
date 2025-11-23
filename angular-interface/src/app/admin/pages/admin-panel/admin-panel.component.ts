@@ -23,10 +23,11 @@ import { CommonModule } from '@angular/common';
   styleUrl: './admin-panel.component.scss'
 })
 export class AdminPanelComponent implements OnInit {
-  username: string = '';
+  username: string = ''; // Agora usado para e-mail
   password: string = '';
   errorMessage: string = '';
   returnUrl: string = '/admin-panel/reservas';
+  isLoading: boolean = false;
 
   constructor(
     private authService: AuthService,
@@ -36,30 +37,46 @@ export class AdminPanelComponent implements OnInit {
 
   ngOnInit(): void {
     // Se já estiver autenticado, redireciona
-    if (this.authService.isAuthenticated()) {
-      this.router.navigate([this.returnUrl]);
-    }
+    // Monitoramos o observable para garantir que o estado esteja carregado
+    this.authService.isAuthenticated$.subscribe(isAuthenticated => {
+      if (isAuthenticated) {
+        this.router.navigate([this.returnUrl]);
+      }
+    });
 
     // Pega a URL de retorno dos query params
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/admin-panel/reservas';
   }
 
-  onSubmit(): void {
+  async onSubmit(): Promise<void> {
     this.errorMessage = '';
+    this.isLoading = true;
 
     if (!this.username || !this.password) {
       this.errorMessage = 'Por favor, preencha todos os campos';
+      this.isLoading = false;
       return;
     }
 
-    const loginSuccess = this.authService.login(this.username, this.password);
-
-    if (loginSuccess) {
-      // Login bem-sucedido, redireciona para a página desejada
+    try {
+      await this.authService.login(this.username, this.password);
+      // Login bem-sucedido, o redirecionamento ocorre no authService ou no subscribe do ngOnInit
       this.router.navigate([this.returnUrl]);
-    } else {
+    } catch (error: any) {
       // Login falhou
-      this.errorMessage = 'Usuário ou senha incorretos';
+      console.error(error);
+      this.isLoading = false;
+
+      if (error.code === 'auth/invalid-email') {
+        this.errorMessage = 'E-mail inválido.';
+      } else if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+        this.errorMessage = 'Usuário ou senha incorretos.';
+      } else if (error.code === 'auth/too-many-requests') {
+        this.errorMessage = 'Muitas tentativas. Tente novamente mais tarde.';
+      } else {
+        this.errorMessage = 'Erro ao realizar login. Tente novamente.';
+      }
+
       this.password = ''; // Limpa a senha
     }
   }

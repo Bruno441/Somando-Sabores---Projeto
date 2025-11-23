@@ -23,9 +23,9 @@ export class SideBarComponent {
     this.route.navigate([`/${rota}`])
   }
 
-  logout(): void {
+  async logout(): Promise<void> {
     if (confirm('Deseja realmente sair?')) {
-      this.authService.logout();
+      await this.authService.logout();
     }
   }
 }
