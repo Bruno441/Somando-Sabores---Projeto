@@ -38,17 +38,16 @@
                 <mat-icon matPrefix>lock</mat-icon>
             </mat-form-field>
 
-            <!-- <a href="" id="e-senha">Esqueceu a senha?</a> -->
+            <a routerLink="/admin-panel/forgot-password" id="e-senha">Esqueceu a senha?</a>
             
             <button 
                 id="entrar-btn" 
                 mat-raised-button 
                 type="submit"
-                [disabled]="!username || !password"
+                [disabled]="!username || !password || isLoading"
             >
-                Entrar
+                {{ isLoading ? 'Entrando...' : 'Entrar' }}
             </button>
         </form>
     </div>
 </section>
-

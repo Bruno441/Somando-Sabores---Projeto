@@ -12,6 +12,7 @@ import { AdmPagamentosComponent } from './admin/pages/adm-pagamentos/adm-pagamen
 import { ConfirmacaoComponent } from './pages/confirmacao/confirmacao.component';
 import { ResumoPacoteComponent } from './pages/resumo-pacote/resumo-pacote.component';
 import { NotFoundComponent } from './pages/not-found/not-found.component';
+import { ForgotPasswordComponent } from './admin/pages/forgot-password/forgot-password.component';
 
 import { AuthGuard } from './guards/auth.guard';
 
@@ -22,6 +23,7 @@ export const routes: Routes = [
   { path: 'pacotes', component: PacotesComponent },
   { path: 'reservas', component: ReservasComponent },
   { path: 'admin-panel', component: AdminPanelComponent},
+  { path: 'admin-panel/forgot-password', component: ForgotPasswordComponent },
   { 
     path: 'admin-panel/relatorios', 
     component: AdmRelatoriosComponent,
