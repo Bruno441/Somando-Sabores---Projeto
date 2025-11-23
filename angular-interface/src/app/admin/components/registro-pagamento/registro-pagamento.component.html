@@ -1,8 +1,8 @@
 <section class="box-pagamentos">
     <div class="registro-pagamento">
-        <span id="id_pagamento">{{ localPagamento.id }}</span>
-        <span id="nome_pagamento">{{ localPagamento.nome }}</span>
-        <span id="valor_pagamento"> {{ localPagamento.valorTotal }} </span>
-        <span id="data_pagamento">{{ localPagamento.dataPagamento }}</span>
+        <span id="id_pagamento" class="text-truncate">{{ localPagamento.id }}</span>
+        <span id="nome_pagamento" class="text-truncate">{{ localPagamento.nome }}</span>
+        <span id="valor_pagamento" class="text-right"> {{ localPagamento.valorTotal | currency:'BRL' }} </span>
+        <span id="data_pagamento" class="text-right">{{ localPagamento.dataPagamento | date:'dd/MM/yyyy' }}</span>
     </div>
 </section>

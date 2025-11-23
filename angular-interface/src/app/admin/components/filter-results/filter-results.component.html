@@ -1,11 +1,49 @@
 <section class="filter-bar">
-  <div class="filter-field">
-    <label for="data_filtro">Data</label>
-    <input type="date" id="data_filtro" alt="filtro de data" [(ngModel)]="data" (change)="emitirFiltro()"/>
-  </div>
-  <div class="filter-field">
-    <label for="responsavel">Responsável</label>
-    <input type="text" id="responsavel" alt="responsavel" [(ngModel)]="nome" (input)="emitirFiltro()"/>
-    <mat-icon>search</mat-icon>
+  <div class="filter-content">
+
+    <!-- Campo de Busca por Nome -->
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="compact-field search-field">
+      <mat-label>Responsável</mat-label>
+      <input matInput [(ngModel)]="nome" (input)="emitirFiltro()" placeholder="Buscar por nome">
+
+      <!-- Botão X para limpar apenas o nome se houver texto -->
+      <button
+        mat-icon-button
+        matSuffix
+        *ngIf="nome"
+        (click)="limparNome()"
+        aria-label="Limpar nome"
+        matTooltip="Limpar busca"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+
+      <!-- Ícone de lupa se estiver vazio -->
+      <mat-icon matSuffix *ngIf="!nome" class="search-icon">search</mat-icon>
+    </mat-form-field>
+
+    <!-- Campo de Data -->
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="compact-field date-field">
+      <mat-label>Data da Reserva</mat-label>
+      <input matInput [matDatepicker]="picker" [(ngModel)]="data" (dateChange)="emitirFiltro()" readonly>
+      <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+
+    <!-- Botão de Limpar Filtros Global -->
+    <div class="actions">
+      <button
+        mat-stroked-button
+        color="warn"
+        (click)="limparFiltro()"
+        [disabled]="!nome && !data"
+        class="clear-btn"
+        matTooltip="Limpar todos os filtros"
+      >
+        <mat-icon>delete_sweep</mat-icon>
+        Limpar Filtros
+      </button>
+    </div>
+
   </div>
 </section>

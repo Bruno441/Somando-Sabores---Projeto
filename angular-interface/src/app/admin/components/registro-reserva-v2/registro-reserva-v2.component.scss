@@ -28,6 +28,7 @@ mat-expansion-panel{
     justify-content: space-between;
     margin-inline: 2vw;
     font-family: 'IM Fell English', 'serif';
+    align-items: center;
 }
 
 .titulos{
@@ -41,10 +42,11 @@ mat-expansion-panel{
 input[readonly] {
   font-family: "IM Fell English", "serif";
   font-weight: 400;
-  background-color: #f0f0f0;
+  background-color: transparent;
   border: none;
   cursor: default;
   width: fit-content;
+  color: inherit;
 }
 
 input:not([readonly]) {
@@ -54,6 +56,10 @@ input:not([readonly]) {
   border: 1px solid #ccc;
   cursor: text;
   width: fit-content;
+}
+
+.text-right {
+    text-align: right;
 }
 
 // Estilização dos ícones
@@ -96,4 +102,32 @@ input:not([readonly]) {
 .convidados-data span{
     font-family: 'IM Fell English', 'serif';
     font-size: 1.1em;
+}
+
+/* Status Badge Styles */
+.status-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 80px;
+}
+
+.status-badge {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.9em;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.status-badge.pago {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #c8e6c9;
+}
+
+.status-badge.pendente {
+    background-color: #fff3e0;
+    color: #ef6c00;
+    border: 1px solid #ffe0b2;
 }

@@ -8,8 +8,9 @@
                 <div class="titulos">
                     <span>Responsável</span>
                     <span>E-mail</span>
-                    <span>Qtd. Convidados</span>
-                    <span>Data</span>
+                    <span class="text-right">Qtd. Convidados</span>
+                    <span class="text-right">Data</span>
+                    <span>Status</span>
                 </div>
                 <div class="data">
                     <input id="responsavel" 
@@ -27,15 +28,24 @@
                     <input id="qtdConvidados"
                             [(ngModel)]="localReserva.qtdConvidados"
                             [readonly]="!modoEdicao"
+                            class="text-right"
                             (click)="$event.stopPropagation()"
                             (keydown.space)="$event.stopImmediatePropagation()"
                             />
-            <input id="dataReserva"
-                [value]="formatarData(localReserva.dataReserva)"
-                [readonly]="true"
-                (click)="$event.stopPropagation()"
-                (keydown.space)="$event.stopImmediatePropagation()"
-                />
+                    <input id="dataReserva"
+                        [value]="formatarData(localReserva.dataReserva)"
+                        [readonly]="true"
+                        class="text-right"
+                        (click)="$event.stopPropagation()"
+                        (keydown.space)="$event.stopImmediatePropagation()"
+                        />
+
+                    <!-- Status Badge -->
+                     <div class="status-container">
+                        <span class="status-badge" [ngClass]="{'pago': localReserva.status === 1, 'pendente': localReserva.status === 0}">
+                            {{ localReserva.status === 1 ? 'Pago' : 'Pendente' }}
+                        </span>
+                     </div>
                 </div>
             </section>
             <div class="icons">

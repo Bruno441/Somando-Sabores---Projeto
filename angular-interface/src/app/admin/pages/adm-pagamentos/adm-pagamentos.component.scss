@@ -62,14 +62,20 @@ hr{
 }
 
 .descricao{
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 2fr 2fr 1fr 1fr;
+    gap: 16px;
     margin-block: 2.5vh;
-    margin-inline: 3vw;
+    padding-inline: 1vw; /* Match registro-pagamento padding */
+    /* margin-inline: 3vw; REMOVED to match grid */
 }
 
 .descricao span{
     font-family: "IM Fell English", serif;
     font-weight: 400;
     color: #000;
+}
+
+.text-right {
+    text-align: right;
 }
