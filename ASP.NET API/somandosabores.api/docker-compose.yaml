@@ -1,4 +1,4 @@
-﻿services:
+services:
 
   db:
     image: postgres:15
@@ -33,5 +33,7 @@
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ${CONNECTION_STRING}
+      - ASAAS_API_KEY=${ASAAS_API_KEY}
+      - Asaas__ApiKey=${ASAAS_API_KEY}
     depends_on:
       - db
