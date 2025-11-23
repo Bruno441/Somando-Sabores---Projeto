@@ -6,14 +6,25 @@
 }
 
 .registro-pagamento{
-    display: flex;
+    display: grid;
+    grid-template-columns: 2fr 2fr 1fr 1fr;
+    gap: 16px;
     padding-inline: 1vw;
     align-items: center;
-    justify-content: space-between;
     margin-block: 3vh;
 }
 
 .registro-pagamento span{
     font-family: 'IM FELL English', 'serif';
     font-size: 0.9em;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.text-truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }

@@ -11,6 +11,7 @@ import { AdmPacotesComponent } from './admin/pages/adm-pacotes/adm-pacotes.compo
 import { AdmPagamentosComponent } from './admin/pages/adm-pagamentos/adm-pagamentos.component';
 import { ConfirmacaoComponent } from './pages/confirmacao/confirmacao.component';
 import { ResumoPacoteComponent } from './pages/resumo-pacote/resumo-pacote.component';
+import { NotFoundComponent } from './pages/not-found/not-found.component';
 
 import { AuthGuard } from './guards/auth.guard';
 
@@ -44,5 +45,5 @@ export const routes: Routes = [
   { path: 'confirmacao', component: ConfirmacaoComponent },
   { path: 'resumo-pacote', component: ResumoPacoteComponent },
   { path: '', redirectTo: '/home', pathMatch: 'full' },
-  { path: '**', component: HomeComponent }
+  { path: '**', component: NotFoundComponent }
 ];
