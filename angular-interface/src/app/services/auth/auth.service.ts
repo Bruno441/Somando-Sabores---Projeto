@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { Auth, signInWithEmailAndPassword, signOut, authState, User } from '@angular/fire/auth';
+import { Auth, signInWithEmailAndPassword, signOut, authState, User, sendPasswordResetEmail } from '@angular/fire/auth';
 
 @Injectable({
   providedIn: 'root'
@@ -31,6 +31,18 @@ export class AuthService {
       // O authState vai atualizar automaticamente o isAuthenticatedSubject
     } catch (error) {
       console.error('Erro no login:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Envia um e-mail de redefinição de senha
+   */
+  async recoverPassword(email: string): Promise<void> {
+    try {
+      await sendPasswordResetEmail(this.auth, email);
+    } catch (error) {
+      console.error('Erro ao enviar email de recuperação:', error);
       throw error;
     }
   }
