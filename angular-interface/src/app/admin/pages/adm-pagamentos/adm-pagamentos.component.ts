@@ -4,7 +4,8 @@ import { RegistroPagamentoComponent } from '../../components/registro-pagamento/
 import { Component, OnInit } from '@angular/core';
 import { ServiceResponse } from '../../../models/ServiceResponseModel';
 import { Pagamento } from '../../../models/PagamentoModel';
-import { PagamentosService } from '../../../services/pagamentos/pagamentos.service';
+import { ReservaService } from '../../../services/reservas/reserva.service';
+import { Reserva } from '../../../models/ReservaModel';
 
 @Component({
   selector: 'app-adm-pagamentos',
@@ -17,7 +18,7 @@ export class AdmPagamentosComponent implements OnInit{
   pagamentos: Pagamento[] = [];
   isLoading: boolean = false;
 
-  constructor(private pagamentoService: PagamentosService) {}
+  constructor(private reservaService: ReservaService) {}
 
   ngOnInit(): void {
     this.carregarPagamentos();
@@ -26,13 +27,24 @@ export class AdmPagamentosComponent implements OnInit{
   carregarPagamentos(): void {
     this.isLoading = true;
 
-    this.pagamentoService.getAll().subscribe(
-      (response: ServiceResponse<Pagamento[]>) => {
+    // Buscamos todas as reservas e filtramos apenas as pagas (status === 1)
+    // Usamos a data da reserva como referência de data de pagamento conforme solicitado
+    this.reservaService.getAll().subscribe(
+      (response: ServiceResponse<Reserva[]>) => {
         this.isLoading = false;
         if (response.success && response.data){
-          this.pagamentos = response.data;
+          // 1. Filtrar reservas pagas
+          const reservasPagas = response.data.filter(r => r.status === 1);
 
-          // Sort by most recent dataPagamento
+          // 2. Mapear para o modelo de visualização de Pagamento
+          this.pagamentos = reservasPagas.map(r => ({
+            id: r.id,
+            nome: r.nome,
+            valorTotal: r.total,
+            dataPagamento: r.dataReserva // Usando DataReserva como proxy
+          }));
+
+          // 3. Ordenar por data (mais recente primeiro)
           this.pagamentos.sort((a, b) => {
              const dataA = new Date(a.dataPagamento).getTime();
              const dataB = new Date(b.dataPagamento).getTime();
